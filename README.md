@@ -31,5 +31,4 @@ deployment details.
 
 * README.md - this file
 * changes.md - notes on changes to the version deployed in the production environment
-* colors.md - notes on possible color schemes, etc.
 * web.md - web addresses, etc.
