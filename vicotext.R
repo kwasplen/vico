@@ -1,3 +1,35 @@
+# ===== ===== ===== ===== ===== ===== ===== ===== ===== ===== ===== ===== ===== ===== =====
+# ===== ===== ===== ===== ===== ===== ===== ===== ===== ===== ===== ===== ===== ===== =====
+# ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- -----
+# Source Code File: vicotext.R for OTA/VICO User Information and Interface Functions
+# ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- -----
+# OTA/VICO Subprograms
+# - User Interface (UI) Text Functions (for Beta 2 UX Purposes)
+# --- otaintrorealtop
+# --- limitationsnow
+# --- callforfeedbacknow
+# --- feedbacknow
+# --- disclaimernow
+# --- considerationsnow
+# --- furtherdetailsnow
+# - User Interface (UI) Text Functions for Program Information Page
+# --- abouttop
+# --- credits
+# --- engineversion
+# --- funding
+# ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- -----
+# ===== ===== ===== ===== ===== ===== ===== ===== ===== ===== ===== ===== ===== ===== =====
+# ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- -----
+# OTA/VICO - User Interface (UI) Text Functions (for Beta 2 UX Purposes)
+# ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- -----
+# otaintrorealtop
+# limitationsnow
+# callforfeedbacknow
+# feedbacknow
+# disclaimernow
+# considerationsnow
+# furtherdetailsnow
+# ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- -----
 otaintrorealtop <- function() {
   list(
     tags$div(style = "padding:2px 10px 5px 10px;text-align: center;font-size: 22px;",
@@ -64,10 +96,12 @@ callforfeedbacknow <- function() {
         paste0("The success of this tool depends on your feedback! ")
       ),
       tags$span(style = "color: black;",
+                # kwa on 12/29/20 - replace Daniel Kaufman with Lewis Linker
+                # kwa on 12/29/20 - replace dkaufman@chesapeakebay.net with linker.lewis@epa.gov
                 HTML(
                   paste0(
-                    'Please send comments or questions to Daniel Kaufman at ',
-                    tags$a(href = 'mailto:dkaufman@chesapeakebay.net', 'dkaufman@chesapeakebay.net'),
+                    'Please send comments or questions to Lewis Linker at ',
+                    tags$a(href = 'mailto:linker.lewis@epa.gov', 'linker.lewis@epa.gov'),
                     '.'
                   )
                 )),
@@ -90,9 +124,10 @@ feedbacknow <- function() {
   tags$div(
     style = "padding: 1px 14% 1px 14%;text-align: center;font-size: 14px;",
     tags$span(style = "color: black;",
+              # kwa on 12/29/20 - replace dkaufman@chesapeakebay.net with linker.lewis@epa.gov
               HTML(
                 paste0(
-                  tags$a(href = 'mailto:dkaufman@chesapeakebay.net', 'dkaufman@chesapeakebay.net')
+                  tags$a(href = 'mailto:linker.lewis@epa.gov', 'linker.lewis@epa.gov')
                 )
               ))
   ),
@@ -241,6 +276,14 @@ furtherdetailsnow <- function() {
     )
   )
 }
+# ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- -----
+# OTA/VICO - User Interface (UI) Text Functions for Program Information Page
+# ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- -----
+# abouttop
+# credits
+# engineversion
+# funding
+# ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- -----
 abouttop <- function() {
   list(
     list(
@@ -345,3 +388,6 @@ funding <- function() {
     )
   )
 }
+# ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- -----
+# ===== ===== ===== ===== ===== ===== ===== ===== ===== ===== ===== ===== ===== ===== =====
+# ===== ===== ===== ===== ===== ===== ===== ===== ===== ===== ===== ===== ===== ===== =====
