@@ -1,4 +1,52 @@
-
+# ===== ===== ===== ===== ===== ===== ===== ===== ===== ===== ===== ===== ===== ===== =====
+# ===== ===== ===== ===== ===== ===== ===== ===== ===== ===== ===== ===== ===== ===== =====
+# ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- -----
+# Source Code File: vicofunc.R for OTA/VICO Functions
+# ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- -----
+# OTA/VICO Subprograms
+# - Utility Functions
+# --- substrRight
+# --- substrChop
+# --- mydistance
+# - "Common Code" Functions
+# --- nitrogencase
+# --- costmincase
+# --- bothcurves
+# --- forcedcircle
+# --- samepoint
+# --- geocodeforthat
+# --- testbucketandpathfront
+# --- filesdataframe
+# --- foundfiles
+# --- ourfilelist
+# --- geoloadguts
+# --- feasiblepart
+# - "Common Code" Functions - more
+# --- moneypart
+# --- moneyportion
+# --- lbportion
+# --- pointplace
+# --- legendother
+# - Load Functions
+# --- load.otadataset
+# --- load.otabardata
+# --- load.otadownloaddata
+# --- load.otadownloadtxtdata
+# - Plot Functions
+# --- plotpoint
+# --- plotdraftdata
+# - Empty (Dummy Placeholder) Plot Functions
+# --- plotempty
+# --- plotemptybar
+# ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- -----
+# ===== ===== ===== ===== ===== ===== ===== ===== ===== ===== ===== ===== ===== ===== =====
+# ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- -----
+# OTA/VICO - Utility Functions
+# ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- -----
+# substrRight
+# substrChop
+# mydistance
+# ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- -----
 substrRight <- function(x, n){
   substr(x, nchar(x)-n+1, nchar(x))
 }
@@ -8,6 +56,22 @@ substrChop <- function(x, n){
 mydistance <- function(x1, x2, y1, y2){
   sqrt((x1-x2)*(x1-x2) + (y2-y1)*(y2-y1))
 }
+# ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- -----
+# OTA/VICO - "Common Code" Functions
+# ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- -----
+# nitrogencase
+# costmincase
+# bothcurves
+# forcedcircle
+# samepoint
+# geocodeforthat
+# testbucketandpathfront
+# filesdataframe
+# foundfiles
+# ourfilelist
+# geoloadguts
+# feasiblepart
+# ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- -----
 nitrogencase <- function(objectivetype) {
   if ((objectivetype == "costmin_Nloadredtarget") | (objectivetype == "Nloadredmax_totalcosttarget"))
     nitrogen <- TRUE
@@ -48,12 +112,12 @@ geocodeforthat <- function(geoselected) {
   rawcode2 <- gsub(",", "", rawcode1, fixed = TRUE)
   code <- gsub(".", "", rawcode2, fixed = TRUE)
 }
-# testbucketandpathfront <- function(bucketname, prefixfront) {
-    # filesdf <- get_bucket_df(
-      # bucket = bucketname,
-      # prefix = prefixfront
-    # )
-# }
+testbucketandpathfront <- function(bucketname, prefixfront) {
+    filesdf <- get_bucket_df(
+      bucket = bucketname,
+      prefix = prefxfront
+    )
+}
 filesdataframe <- function(goahead, geocode, objective, bucketname, prefixfront) {
   if (goahead)
     filesdf <- get_bucket_df(
@@ -122,6 +186,15 @@ feasiblepart <- function(fulldataset) {
     otafeasible <- NULL
   otafeasible
 }
+# ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- -----
+# OTA/VICO - "Common Code" Functions - more
+# ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- -----
+# moneypart
+# moneyportion
+# lbportion
+# pointplace
+# legendother
+# ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- -----
 moneypart <- function(cost) {
   paste0(
     "$",
@@ -183,7 +256,7 @@ legendother <- function(otaobjval, xval, yval, lb, dollars) {
           "% ",
           lb
         )
-      else
+      else # Ploadredmax_totalcosttarget
         objstr = paste0(
           "Total cost \u2264 ",
           dollars,
@@ -196,6 +269,14 @@ legendother <- function(otaobjval, xval, yval, lb, dollars) {
   }
   objstr
 }
+# ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- -----
+# OTA/VICO - Load Functions
+# ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- -----
+# load.otadataset
+# load.otabardata
+# load.otadownloaddata
+# load.otadownloadtxtdata
+# ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- -----
 load.otadataset <- function(file_list, bucketname, msgcore)
 {
   withProgress(message = msgcore, value = 0, { 
@@ -327,6 +408,12 @@ load.otadownloadtxtdata <- function(ourdataset, otaopttype, xval, bucketname)
   else
     NULL
 }
+# ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- -----
+# OTA/VICO - Plot Functions
+# ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- -----
+# plotpoint
+# plotdraftdata
+# ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- -----
 plotpoint <- function(whichcurve,
                       xval,
                       yval,
@@ -363,13 +450,19 @@ plotpoint <- function(whichcurve,
 }
 plotdraftdata <- function()
 {
-  text(x = grconvertX(0.5, from = "npc"),  # align to center of plot X axis
+  text(x = grconvertX(0.5, from = "npc"), # align to center of plot X axis
        y = grconvertY(0.5, from = "npc"), # align to center of plot Y axis
        labels = "DRAFT DATA", # our watermark
        cex = 5, font = 2, # large, bold font - hard to miss
        col = rgb(0.17, 0.17, 0.17, .2), # translucent (0.2 = 20%) gray/gray color
        srt = -20) # srt = angle of text: -20 degree angle to X axis
 }
+# ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- -----
+# OTA/VICO - Empty (Dummy Placeholder) Plot Functions
+# ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- -----
+# plotempty
+# plotemptybar
+# ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- -----
 plotempty <- function(mainlabel, xaxislabel, yaxislabel, colorchoice, bgcolor, xleft, xright)
 {
   plot(NULL,
@@ -404,3 +497,6 @@ plotemptybar <- function(mainlabel, colorchoice, bgcolor)
   grid(nx = NULL, ny = NA)
   title(main = '', line = 1)
 }
+# ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- -----
+# ===== ===== ===== ===== ===== ===== ===== ===== ===== ===== ===== ===== ===== ===== =====
+# ===== ===== ===== ===== ===== ===== ===== ===== ===== ===== ===== ===== ===== ===== =====
