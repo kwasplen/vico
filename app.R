@@ -1,20 +1,57 @@
+# ===== ===== ===== ===== ===== ===== ===== ===== ===== ===== ===== ===== ===== ===== =====
+# ===== ===== ===== ===== ===== ===== ===== ===== ===== ===== ===== ===== ===== ===== =====
+# ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- -----
+# Source Code File: app.R
+# ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- -----
+# Program:
+# - Visualization Interface for Chesapeake Optimization (VICO)
+# R Shiny Source Files:
+# - app.R, vicofunc.R, vicotext.R, counties.csv, and hotjar.js
+# Data Files (and AWS S3 Access):
+# - See VICOBucketName and VICOBucketPathPrefixFront.
+# - See aws.s3, aws.ec2metadata, and setenv.
+# ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- -----
+# ===== ===== ===== ===== ===== ===== ===== ===== ===== ===== ===== ===== ===== ===== =====
+# ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- -----
+# OTA/VICO - libraries
+# ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- -----
 library(shiny)
+# library(sm) - remove this library reference if not needed
 library(sm) # Smoothing Methods for Nonparametric Regression and Density Estimation
 library(aws.s3)
+library(aws.ec2metadata)
+# ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- -----
+# OTA/VICO - options
+# ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- -----
 options(shiny.maxRequestSize = 6*1024^2)
-# place Sys.setenv(...) with access credentials for reading data files from S3
+# ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- -----
+# OTA/VICO - setenv
+# ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- -----
+Sys.setenv("AWS_DEFAULT_REGION" = "us-east-1")
+# ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- -----
+# OTA/VICO - subprograms
+# ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- -----
 source('vicofunc.R')
 source('vicotext.R')
+# ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- -----
+# OTA/VICO - initialize here for visibility across all sessions - geo menu
+# ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- -----
 GeoMaster <- read.csv(file = "counties.csv", header = FALSE)
 GeoMenu <- split(GeoMaster$V1, GeoMaster$V2)
-GeoMenu$DC<-NULL
+GeoMenu$DC <- NULL
 AskClearGeoString <- 'Choose Geography (No Current Selection)'
+# ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- -----
+# OTA/VICO - initialize here for visibility across all sessions - AWS S3 Access
+# ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- -----
 VICOBucketName <- "modeling-data.chesapeakebay.net"
-VICOBucketPathPrefixFront <- "optimization/vico_beta2-bayota_0.1b2_20191004/" # something like this
-AvailableS3Buckets <- bucketlist()
+VICOBucketPathPrefixFront <- "optimization/vico_beta2-bayota_0.1b2_20191004/"
 VICOBucketOK <- (bucket_exists('modeling-data.chesapeakebay.net'))
+# ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- -----
+# ===== ===== ===== ===== ===== ===== ===== ===== ===== ===== ===== ===== ===== ===== =====
+# ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- -----
 ui <- navbarPage(
   title = "VICO", id="navbar",
+# ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- -----
 tabPanel(
   title = "Explore Optimization Results",
   value = "twogeos",
@@ -133,6 +170,7 @@ tabPanel(
     )),
     uiOutput("otadisclaim")
   ),
+  # ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- -----
 tabPanel(title = "About",
          value = "vicoinfo",
          fluidRow(column(
@@ -152,7 +190,13 @@ tabPanel(title = "About",
            )
          )))
 )
+# ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- -----
+# ===== ===== ===== ===== ===== ===== ===== ===== ===== ===== ===== ===== ===== ===== =====
+# ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- -----
 server <- function(input, output) {
+  # ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- -----
+  # OTA/VICO Reactive Objects and Data Structures - interface booleans
+  # ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- -----
   gotriangle <-
     reactive ({
       okay <- (input$otageo1comp != AskClearGeoString)
@@ -185,16 +229,25 @@ server <- function(input, output) {
     reactive ({
       okay <- (input$pointmode == 'TwoPoint')
     })
+  # ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- -----
+  # OTA/VICO Reactive Objects and Data Structures - no geography selection
+  # ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- -----
   havegeo1 <- 
     reactive ({ noselection <- gotriangle()
     })
   havegeo2 <- 
     reactive ({ noselection <- gocircle()
     })
+  # ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- -----
+  # OTA/VICO Reactive Objects and Data Structures - conditional loads
+  # ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- -----
   stategui <- reactiveValues(
     dataset1 = NULL,
     dataset2 = NULL
   )
+  # ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- -----
+  # OTA/VICO Reactive Objects and Data Structures - primary graph
+  # ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- -----
   otageo1code <-
     reactive ({
       geocodeforthat(input$otageo1comp)
@@ -265,6 +318,9 @@ server <- function(input, output) {
       markdataset <- NULL
     markdataset
   })
+  # ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- -----
+  # OTA/VICO Reactive Objects and Data Structures - some strings/labels
+  # ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- -----
   otaTrianglePlace <-
     reactive ({
       place <- input$otageo1comp
@@ -327,6 +383,9 @@ server <- function(input, output) {
       }
       titlestr <- objstr
     })
+  # ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- -----
+  # OTA/VICO Reactive Objects and Data Structures - primary graph - point click
+  # ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- -----
   otaclickmode <- reactive({
     if (is.null(input$clickmode))
       mode <- "Nearest"
@@ -531,6 +590,9 @@ server <- function(input, output) {
       gotvals$point2 <- near2
     }
   }
+  # ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- -----
+  # OTA/VICO Reactive Objects and Data Structures - money/dollars
+  # ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- -----
   ota1dollars <- reactive({
     if (costmincase(input$otaobjcomp))
         moneyportion(gotvals$point1[2])
@@ -543,6 +605,9 @@ server <- function(input, output) {
     else
         moneyportion(gotvals$point2[1])
   })
+  # ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- -----
+  # OTA/VICO Reactive Objects and Data Structures - colors for plots
+  # ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- -----
   otacurve1color <- reactive({
     if (otaclickmode() == "Forced")
       color <- "Gray" # Grey
@@ -602,6 +667,9 @@ server <- function(input, output) {
     else
       color <- "Gray" # Grey
   })
+  # ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- -----
+  # OTA/VICO Reactive Objects and Data Structures - bar graph, etc.
+  # ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- -----
   ota1bardata <- reactive({
     if (!is.null(gotvals$point1curve))
       {
@@ -748,6 +816,9 @@ server <- function(input, output) {
       showit <- FALSE
     showit
   })
+  # ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- -----
+  # OTA/VICO Reactive Objects and Data Structures - load change
+  # ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- -----
   ota1loaddiff <- reactive({
     if (!is.null(gotvals$point1curve))
     {
@@ -824,6 +895,9 @@ server <- function(input, output) {
   })
   ota1lb <- reactive({lbportion(ota1loaddiff())})
   ota2lb <- reactive({lbportion(ota2loaddiff())})
+  # ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- -----
+  # OTA/VICO Reactive Objects and Data Structures - more strings/labels
+  # ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- -----
   otaBar1Place <-
     reactive ({
       if (twopointmode() & gottwopoints())
@@ -860,6 +934,9 @@ server <- function(input, output) {
                   ota2lb(),
                   ota2dollars())
     })
+  # ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- -----
+  # OTA/VICO Miscellaneous - Download Handling
+  # ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- -----
   output$csvdownloadData1 <- downloadHandler(
     filename = function() {
       paste("download1", ".csv", sep = "")
@@ -937,6 +1014,9 @@ server <- function(input, output) {
     else
       NULL
   })
+  # ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- -----
+  # OTA/VICO Miscellaneous - Dynamic Control
+  # ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- -----
   output$clicksetting <- renderUI({
     if (doboth())
     {
@@ -954,17 +1034,26 @@ server <- function(input, output) {
     else
       column(6)
   })
+  # ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- -----
+  # VICO Introductory Information Panel and Text
+  # ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- -----
   output$otaintro <- renderUI({
     list(otaintrorealtop(),
          limitationsnow(),
          callforfeedbacknow())
   })
+  # ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- -----
+  # VICO Bottom Disclaimer Panel and Text
+  # ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- -----
   output$otadisclaim <- renderUI({
     list(feedbacknow(),
          disclaimernow(),
          considerationsnow(),
          furtherdetailsnow())
   })
+  # ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- -----
+  # VICO Main Plot (for Beta 2 Release)
+  # ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- -----
   output$otageomainplot <- renderPlot({
     if (doboth())
       otageoplotboth()
@@ -986,6 +1075,9 @@ server <- function(input, output) {
       )
   })
   outputOptions(output, "otageomainplot", priority = -7)
+  # ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- -----
+  # VICO Main Plot for Beta 2 Release - Both "Subroutine"
+  # ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- -----
   otageoplotboth <- function() {
     if (!is.null(otageo1datause()) & !is.null(otageo2datause()))
     {
@@ -1010,6 +1102,9 @@ server <- function(input, output) {
         50
       )
   }
+  # ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- -----
+  # VICO Main Plot for Beta 2 Release - Triangle "Subroutine"
+  # ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- -----
   otageoplottriangle <- function() {
     if (!is.null(otageo1datause()))
     {
@@ -1034,6 +1129,9 @@ server <- function(input, output) {
         50
       )
   }
+  # ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- -----
+  # VICO Main Plot for Beta 2 Release - Circle "Subroutine"
+  # ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- -----
   otageoplotcircle <- function() {
     if (!is.null(otageo2datause()))
     {
@@ -1058,6 +1156,9 @@ server <- function(input, output) {
         50
       )
   }
+  # ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- -----
+  # VICO Main Plot for Beta 2 Release - Both - Cost Min "Subroutine"
+  # ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- -----
   otageoplotbothcostmin <- function() {
     yrange <-
       range(c(
@@ -1151,6 +1252,9 @@ server <- function(input, output) {
     )
     plotdraftdata()
   }
+  # ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- -----
+  # VICO Main Plot for Beta 2 Release - Both - Load Red Max "Subroutine"
+  # ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- -----
   otageoplotbothloadredmax <- function() {
     yrange <-
       range(c(
@@ -1242,6 +1346,9 @@ server <- function(input, output) {
     )
     plotdraftdata()
   }
+  # ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- -----
+  # VICO Main Plot for Beta 2 Release - One Curve - Cost Min "Subroutine"
+  # ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- -----
   otageoplotonecostmin <- function(curveindex) {
     if (curveindex == 1) # curveindex is 1 for geo 1 (triangle)
     {
@@ -1319,6 +1426,9 @@ server <- function(input, output) {
     )
     plotdraftdata()
   }
+  # ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- -----
+  # VICO Main Plot for Beta 2 Release - One Curve - Load Red Max "Subroutine"
+  # ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- -----
   otageoplotoneloadredmax <- function(curveindex) {
     if (curveindex == 1) # curveindex is 1 for geo 1 (triangle)
     {
@@ -1393,6 +1503,9 @@ server <- function(input, output) {
     )
     plotdraftdata()
   }
+  # ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- -----
+  # VICO BMP Bar Plot (for Beta 2 Release)
+  # ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- -----
   output$otabarplot <- renderPlot({
     if (twopointmode() & gottwopoints())
       otabarplottwo()
@@ -1410,6 +1523,9 @@ server <- function(input, output) {
     otabarheight()
   })
   outputOptions(output, "otabarplot", priority = -14)
+  # ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- -----
+  # VICO BMP Bar Plot for Beta 2 Release - One Point "Subroutine"
+  # ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- -----
   otabarplotone <- function() {
     if (!is.null(gotvals$point1curve))
     {
@@ -1426,6 +1542,9 @@ server <- function(input, output) {
     else
       NULL
   }
+  # ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- -----
+  # VICO BMP Bar Plot for Beta 2 Release - One Point "Subroutine" Guts
+  # ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- -----
   otabarplotoneguts <- function() {
     par(mar=c(5.1,4.1,0,2.1)) # bottom, left, top, right
     opar = par(oma = c(0,0,4,0))
@@ -1471,6 +1590,9 @@ server <- function(input, output) {
     par(opar) # reset par 
     plotdraftdata()
   }
+  # ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- -----
+  # VICO BMP Bar Plot for Beta 2 Release - Two Point "Subroutine"
+  # ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- -----
   otabarplottwo <- function() {
     if (gottwopoints())
     {
@@ -1487,6 +1609,9 @@ server <- function(input, output) {
     else
       NULL
   }
+  # ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- -----
+  # VICO BMP Bar Plot for Beta 2 Release - Two Point "Subroutine" Guts
+  # ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- -----
   otabarplottwoguts <- function() {
     newdf <- otacompbardata()
     newdf$strsortfield <- as.character(newdf$bmpfullname)
@@ -1576,5 +1701,13 @@ server <- function(input, output) {
     par(opar) # reset par
     plotdraftdata()
   }
+  # ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- -----
+  # ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- -----
 }
+# ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- -----
+# ===== ===== ===== ===== ===== ===== ===== ===== ===== ===== ===== ===== ===== ===== =====
+# ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- -----
 shinyApp(ui = ui, server = server)
+# ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- -----
+# ===== ===== ===== ===== ===== ===== ===== ===== ===== ===== ===== ===== ===== ===== =====
+# ===== ===== ===== ===== ===== ===== ===== ===== ===== ===== ===== ===== ===== ===== =====
