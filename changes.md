@@ -24,7 +24,6 @@ Changes should be categorized as follows:
 Work began in March 2019.
 Goal was to release a Beta version at the start of April.
 Many changes made.  Not tracked here.
-May decide to document certain milestones and track certain major decisions and changes here.
 
 ## First Beta Release
 
@@ -53,3 +52,9 @@ Added, 2019-04-02, Update Beta-1
 Important enhancements included the ability to plot two counties' solutions in 
 objective space (cost, load) and the ability to compare two points (from same 
 county curve or different county curves).  Published in the November 2019 timeframe.
+
+## Second Beta Updates (most recent at top)
+
+Changed, 2020-12-29
+* Changed AWS S3 access based on key credentials to access based on the role of the EC2 host.
+* Changed feedback contact from Danny Kaufman to Lewis Linker.
